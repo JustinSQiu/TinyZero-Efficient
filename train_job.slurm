@@ -3,7 +3,8 @@
 #SBATCH --output=slurm_output.txt
 #SBATCH --partition=p_nlp
 #SBATCH --gpus=1
-#SBATCH --mem-per-cpu=200
+#SBATCH --cpus-per-task=1
+#SBATCH --mem-per-cpu=800
 #SBATCH --constraint=48GBgpu
 
 nvidia-smi
