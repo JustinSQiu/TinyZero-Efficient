@@ -99,7 +99,9 @@ def main(config):
     if not ray.is_initialized():
         # this is for local ray cluster
         ray.init(runtime_env={'env_vars': {'TOKENIZERS_PARALLELISM': 'true', 'NCCL_DEBUG': 'WARN'}})
-
+        # ray.init()
+        # import os
+        # os.environ["TOKENIZERS_PARALLELISM"] = "true"
     ray.get(main_task.remote(config))
 
 
@@ -107,6 +109,17 @@ def main(config):
 def main_task(config):
     from verl.utils.fs import copy_local_path_from_hdfs
     from transformers import AutoTokenizer
+    # import os
+    # import yaml
+
+    # Set dtype to half explicitly
+    config.dtype = 'half'
+    config.actor_rollout_ref.rollout.dtype = 'half'
+
+    # Load WANDB_API_KEY from configuration file
+    # with open('/home1/j/jsq/dev/TinyZero-Efficient/config/secret_config.yaml', 'r') as file:
+    #     secret_config = yaml.safe_load(file)
+    # os.environ['WANDB_API_KEY'] = secret_config['wandb']['api_key']
 
     # print initial config
     from pprint import pprint

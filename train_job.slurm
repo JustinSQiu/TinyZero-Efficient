@@ -3,10 +3,12 @@
 #SBATCH --output=slurm_output.txt
 #SBATCH --partition=p_nlp
 #SBATCH --gpus=1
-#SBATCH --cpus-per-task=4
-#SBATCH --mem=64GB
+#SBATCH --mem-per-cpu=200
+#SBATCH --constraint=48GBgpu
 
-# Load the appropriate CUDA module
+nvidia-smi
+
+# Load the appropriate CUDA and GCC modules
 module load cuda/11.7  # Choose cuda/11.7 or cuda/11.8 based on availability
 
 # Display CUDA version
@@ -15,6 +17,8 @@ nvcc --version
 
 # Verify CUDA availability in PyTorch
 python -c "import torch; print('CUDA Available:', torch.cuda.is_available())"
+python -c "import torch; print('PyTorch Version:', torch.__version__)"
+python --version
 
 # List available modules for debugging
 echo "Listing Available Modules:"
@@ -27,6 +31,8 @@ export DATA_DIR=/home1/j/jsq/data/countdown
 export ROLLOUT_TP_SIZE=1
 export EXPERIMENT_NAME=countdown-qwen2.5-0.5b
 export VLLM_ATTENTION_BACKEND=XFORMERS
+
+export HYDRA_FULL_ERROR=1
 
 # Activate the Conda environment
 source /home1/j/jsq/miniconda3/bin/activate zero
@@ -73,4 +79,6 @@ python3 -m verl.trainer.main_ppo \
   trainer.test_freq=100 \
   trainer.project_name=TinyZero \
   trainer.experiment_name=$EXPERIMENT_NAME \
-  trainer.total_epochs=15 2>&1 | tee verl_demo.log
+  trainer.total_epochs=15 \
+  +dtype=half \
+  2>&1 | tee verl_demo.log
